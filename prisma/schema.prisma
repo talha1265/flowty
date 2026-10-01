@@ -1,0 +1,189 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum Role {
+  BRAND
+  INFLUENCER
+  AI_CREATOR
+  ADMIN
+}
+
+enum BookingStatus {
+  PENDING
+  PAID_ESCROW
+  IN_PROGRESS
+  DELIVERED
+  COMPLETED_RELEASED
+  DISPUTED
+  CANCELLED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSED
+  FAILED
+}
+
+model User {
+  id           String             @id @default(cuid())
+  email        String             @unique
+  passwordHash String?
+  name         String
+  role         Role               @default(BRAND)
+  avatarUrl    String?
+  phone        String?
+  city         String?
+  upiId        String?
+  googleId     String?            @unique
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  influencer   InfluencerProfile?
+  aiCreator    AiCreatorProfile?
+  brandBookings BookingOrder[]    @relation("BrandOrders")
+  creatorBookings BookingOrder[]  @relation("CreatorOrders")
+  payouts      Payout[]
+  reviewsWritten Review[]         @relation("BrandReviews")
+  reviewsReceived Review[]        @relation("CreatorReviews")
+}
+
+model InfluencerProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  displayName            String
+  bio                    String
+  city                   String
+  state                  String?
+  country                String   @default("India")
+  niche                  String   // e.g. "Tech & Gadgets", "Fashion & Lifestyle", "Fitness", "Finance"
+  instagramHandle        String?
+  youtubeHandle          String?
+  followerCount          Int      @default(0)
+  engagementRate         Float    @default(0.0) // e.g. 4.8%
+  
+  // Demographics breakdown (Percentages, sum to 100)
+  audienceAge_13_17      Int      @default(5)
+  audienceAge_18_24      Int      @default(45)
+  audienceAge_25_34      Int      @default(35)
+  audienceAge_35_44      Int      @default(10)
+  audienceAge_45_plus    Int      @default(5)
+
+  audienceGenderMale     Int      @default(55)
+  audienceGenderFemale   Int      @default(42)
+  audienceGenderOther    Int      @default(3)
+
+  startingPrice          Float    @default(5000)
+  pricingPackagesJson    String   // JSON array of packages [{id, title, price, deliverables, turnaround}]
+  upiId                  String   // Payout address (e.g. creator@okhdfcbank)
+  isVerified             Boolean  @default(false)
+  rating                 Float    @default(4.9)
+  totalReviews           Int      @default(0)
+  samplePostsJson        String?  // JSON array of media showcase urls
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model AiCreatorProfile {
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studioName             String
+  bio                    String
+  city                   String
+  state                  String?
+  country                String   @default("India")
+  aiToolsList            String   // e.g. "Runway Gen-3 Alpha, Midjourney v6, Kling AI, Luma Dream Machine, ElevenLabs"
+  avatarStyle            String   // e.g. "Hyper-realistic Humanoid", "Cyberpunk Anime", "Corporate 3D"
+  promptSpecialty        String   // e.g. "Cinematic Sci-Fi, Commercial Product Ads, Viral Storytelling"
+  sampleVideosJson       String   // JSON array of [{title, prompt, videoUrl, thumbUrl}]
+  commercialLicenseIncluded Boolean @default(true)
+  turnaroundDays         Int      @default(2)
+  followerCount          Int      @default(25000)
+  
+  // Demographics breakdown
+  audienceAge_18_24      Int      @default(50)
+  audienceAge_25_34      Int      @default(40)
+  audienceAge_35_plus    Int      @default(10)
+  audienceGenderMale     Int      @default(65)
+  audienceGenderFemale   Int      @default(35)
+
+  startingPrice          Float    @default(8000)
+  pricingPackagesJson    String   // JSON array of packages [{id, title, price, durationSeconds, resolution}]
+  upiId                  String   // Creator UPI ID for instant payout
+  isVerified             Boolean  @default(false)
+  rating                 Float    @default(5.0)
+  totalReviews           Int      @default(0)
+
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+}
+
+model BookingOrder {
+  id                String        @id @default(cuid())
+  brandId           String
+  brand             User          @relation("BrandOrders", fields: [brandId], references: [id])
+  creatorId         String
+  creator           User          @relation("CreatorOrders", fields: [creatorId], references: [id])
+  creatorType       String        // "INFLUENCER" or "AI_CREATOR"
+  
+  packageTitle      String
+  briefDetails      String
+  deliverables      String
+  
+  amount            Float         // Total amount paid by brand
+  platformFee       Float         // Platform commission (e.g. 5%)
+  creatorEarnings   Float         // Amount held for creator payout
+  currency          String        @default("INR")
+  
+  status            BookingStatus @default(PENDING)
+  
+  // PayU Integration fields
+  payuTxnId         String?       @unique
+  payuPaymentId     String?
+  payuStatus        String?
+  payuHash          String?
+  
+  creatorUpiId      String
+  workSubmissionUrl String?
+  
+  payout            Payout?
+  review            Review?
+
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+}
+
+model Payout {
+  id             String       @id @default(cuid())
+  bookingOrderId String       @unique
+  bookingOrder   BookingOrder @relation(fields: [bookingOrderId], references: [id])
+  creatorId      String
+  creator        User         @relation(fields: [creatorId], references: [id])
+  creatorUpiId   String
+  amount         Float
+  status         PayoutStatus @default(PENDING)
+  transactionRef String?
+  processedAt    DateTime?
+  createdAt      DateTime     @default(now())
+}
+
+model Review {
+  id             String       @id @default(cuid())
+  bookingOrderId String       @unique
+  bookingOrder   BookingOrder @relation(fields: [bookingOrderId], references: [id])
+  brandId        String
+  brand          User         @relation("BrandReviews", fields: [brandId], references: [id])
+  creatorId      String
+  creator        User         @relation("CreatorReviews", fields: [creatorId], references: [id])
+  rating         Int          // 1 to 5
+  comment        String
+  createdAt      DateTime     @default(now())
+}
