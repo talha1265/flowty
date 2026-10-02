@@ -2,6 +2,8 @@
 
 A production-level marketplace platform built with **Next.js 14**, **Neon Serverless PostgreSQL**, **Prisma ORM**, and **PayU Payment Gateway with Escrow Protection**.
 
+[![Deployed on Vercel](https://img.shields.io/badge/Deployed%20on-Vercel-black?logo=vercel)](https://vercel.com)
+
 ---
 
 ## 🌟 Key Features
