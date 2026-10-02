@@ -7,7 +7,7 @@ import { Booking } from '@/lib/types';
 import { Icons } from '@/components/Icons';
 import { UpiBadge } from '@/components/UpiBadge';
 
-export default function BrandDashboardPage() {
+function BrandDashboardContent() {
   const searchParams = useSearchParams();
   const paymentState = searchParams.get('payment');
   const bookedId = searchParams.get('bookingId');
@@ -270,5 +270,13 @@ export default function BrandDashboardPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function BrandDashboardPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm text-zinc-500">Loading Dashboard...</div>}>
+      <BrandDashboardContent />
+    </React.Suspense>
   );
 }

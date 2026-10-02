@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Icons } from '@/components/Icons';
 import { UPI_REGEX } from '@/lib/security';
 
-export default function CreatorOnboardingPage() {
+function CreatorOnboardingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = searchParams.get('type') === 'AI_CREATOR' ? 'AI_CREATOR' : 'INFLUENCER';
@@ -657,5 +657,13 @@ export default function CreatorOnboardingPage() {
         </div>
       </form>
     </div>
+  );
+}
+
+export default function CreatorOnboardingPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm text-zinc-500">Loading...</div>}>
+      <CreatorOnboardingContent />
+    </React.Suspense>
   );
 }

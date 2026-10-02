@@ -7,7 +7,7 @@ import { signIn } from 'next-auth/react';
 import { Icons } from '@/components/Icons';
 import { UPI_REGEX } from '@/lib/security';
 
-export default function SignUpPage() {
+function SignUpContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const initialType = searchParams.get('type') === 'creator' ? 'CREATOR' : 'BRAND';
@@ -577,5 +577,13 @@ export default function SignUpPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignUpPage() {
+  return (
+    <React.Suspense fallback={<div className="min-h-screen flex items-center justify-center text-sm text-zinc-500">Loading...</div>}>
+      <SignUpContent />
+    </React.Suspense>
   );
 }
