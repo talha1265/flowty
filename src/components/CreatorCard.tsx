@@ -28,7 +28,7 @@ export function CreatorCard({ creator }: CreatorCardProps) {
 
   return (
     <div
-      className={`group relative flex flex-col justify-between rounded-2xl p-5 bg-white border transition-all duration-300 hover:-translate-y-1 ${
+      className={`group relative flex flex-col justify-between rounded-2xl p-5 bg-white border transition-all duration-300 hover:-translate-y-1 h-full ${
         isAi
           ? 'border-purple-200/80 hover:border-purple-300 shadow-subtle hover:shadow-[0_16px_36px_-6px_rgba(147,51,234,0.08)]'
           : 'border-zinc-200/90 hover:border-zinc-300 shadow-subtle hover:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.07)]'

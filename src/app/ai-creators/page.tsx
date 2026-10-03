@@ -96,11 +96,24 @@ export default function AiCreatorsPage() {
             <p className="text-xs text-zinc-500 font-medium">Loading generative AI video studios...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {creators.map(creator => (
-              <CreatorCard key={creator.id} creator={creator} />
-            ))}
-          </div>
+          <>
+            <div className="flex items-center justify-between text-xs text-zinc-500 md:hidden mb-2 px-1">
+              <span className="flex items-center gap-1 font-medium text-purple-700">
+                <span>Swipe AI studios horizontally</span>
+                <span>&rarr;</span>
+              </span>
+              <span className="text-[11px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-semibold border border-purple-200/50">
+                {creators.length} studios
+              </span>
+            </div>
+            <div className="flex md:grid overflow-x-auto md:overflow-x-visible snap-x snap-mandatory no-scrollbar pb-5 md:pb-0 gap-4 sm:gap-6 -mx-4 px-4 sm:-mx-6 sm:px-6 md:mx-0 md:px-0 md:grid-cols-2 lg:grid-cols-3">
+              {creators.map(creator => (
+                <div key={creator.id} className="w-[84vw] sm:w-[350px] md:w-auto shrink-0 snap-center md:snap-align-none flex flex-col">
+                  <CreatorCard creator={creator} />
+                </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>
